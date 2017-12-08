@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "nrpc.proto";
+import "nrpc/nrpc.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 option (gogoproto.gogoproto_import) = false;

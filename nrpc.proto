@@ -2,9 +2,22 @@ syntax = "proto3";
 
 package nrpc;
 
-option go_package = "github.com/rapidloop/nrpc";
+option go_package = "github.com/nats-rpc/gogo-nrpc;nrpc";
 
 import "google/protobuf/descriptor.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.gostring_all) = true;
+option (gogoproto.equal_all) = true;
+option (gogoproto.verbose_equal_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+option (gogoproto.populate_all) = true;
+option (gogoproto.testgen_all) = true;
+option (gogoproto.benchgen_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
 
 enum SubjectRule {
     COPY = 0;

@@ -2,13 +2,27 @@ syntax = "proto3";
 
 package main;
 
-import "github.com/rapidloop/nrpc/nrpc.proto";
+import "github.com/nats-rpc/gogo-nrpc/nrpc.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 option (nrpc.packageSubject) = "root";
 option (nrpc.packageSubjectParams) = "instance";
 
 option (nrpc.serviceSubjectRule) = TOLOWER;
 option (nrpc.methodSubjectRule) = TOLOWER;
+
+option (gogoproto.gogoproto_import) = false;
+option (gogoproto.gostring_all) = true;
+option (gogoproto.equal_all) = true;
+option (gogoproto.verbose_equal_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+option (gogoproto.populate_all) = true;
+option (gogoproto.testgen_all) = true;
+option (gogoproto.benchgen_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
 
 service SvcCustomSubject {
     option (nrpc.serviceSubject) = 'custom_subject';

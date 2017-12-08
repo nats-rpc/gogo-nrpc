@@ -10,12 +10,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/rapidloop/nrpc"
+	"github.com/nats-rpc/gogo-nrpc"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"github.com/golang/protobuf/protoc-gen-go/generator"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	"github.com/gogo/protobuf/proto"
+	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 )
 
 // baseName returns the last path element of the name, with the last dotted suffix removed.
@@ -112,13 +111,43 @@ func goFileName(d *descriptor.FileDescriptorProto) string {
 	return name
 }
 
-func fieldGoType(td *descriptor.FieldDescriptorProto) string {
-	// Use protoc-gen-go generator to get the actual go type (for plain types
+func fieldGoType(field *descriptor.FieldDescriptorProto) string {
+	// Copied protoc-gen-go generator to get the actual go type (for plain types
 	// only!)
-	t, _ := (*generator.Generator)(nil).GoType(nil, td)
-	// We assume proto3, but pass nil to the generator, which will assume proto2.
-	// The consequence is a leading star on the type that we need to trim
-	return strings.TrimPrefix(t, "*")
+	switch *field.Type {
+	case descriptor.FieldDescriptorProto_TYPE_DOUBLE:
+		return "float64"
+	case descriptor.FieldDescriptorProto_TYPE_FLOAT:
+		return "float32"
+	case descriptor.FieldDescriptorProto_TYPE_INT64:
+		return "int64"
+	case descriptor.FieldDescriptorProto_TYPE_UINT64:
+		return "uint64"
+	case descriptor.FieldDescriptorProto_TYPE_INT32:
+		return "int32"
+	case descriptor.FieldDescriptorProto_TYPE_UINT32:
+		return "uint32"
+	case descriptor.FieldDescriptorProto_TYPE_FIXED64:
+		return "uint64"
+	case descriptor.FieldDescriptorProto_TYPE_FIXED32:
+		return "uint32"
+	case descriptor.FieldDescriptorProto_TYPE_BOOL:
+		return "bool"
+	case descriptor.FieldDescriptorProto_TYPE_STRING:
+		return "string"
+	case descriptor.FieldDescriptorProto_TYPE_BYTES:
+		return "[]byte"
+	case descriptor.FieldDescriptorProto_TYPE_SFIXED32:
+		return "int32"
+	case descriptor.FieldDescriptorProto_TYPE_SFIXED64:
+		return "int64"
+	case descriptor.FieldDescriptorProto_TYPE_SINT32:
+		return "int32"
+	case descriptor.FieldDescriptorProto_TYPE_SINT64:
+		return "int64"
+	default:
+		panic("unknown type for" + field.GetName())
+	}
 }
 
 // splitMessageTypeName split a message type into (package name, type name)

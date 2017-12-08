@@ -12,10 +12,10 @@ import (
 	"github.com/golang/protobuf/proto"
 	nats "github.com/nats-io/go-nats"
 
-	"github.com/rapidloop/nrpc"
+	"github.com/nats-rpc/gogo-nrpc"
 )
 
-//go:generate protoc --go_out=. nrpc_test.proto
+//go:generate protoc -I. -I../../.. --gogo_out=. nrpc_test.proto
 //go:generate mv nrpc_test.pb.go nrpcpb_test.go
 
 func TestBasic(t *testing.T) {

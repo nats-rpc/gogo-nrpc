@@ -10,9 +10,9 @@ import (
 
 func TestHelloWorldExample(t *testing.T) {
 	// make sure protoc-gen-nrpc is up to date
-	installGenRPC := exec.Command("go", "install", "./protoc-gen-nrpc")
+	installGenRPC := exec.Command("go", "install", "./protoc-gen-gogo-nrpc")
 	if out, err := installGenRPC.CombinedOutput(); err != nil {
-		t.Fatal("Install protoc-gen-nrpc failed", err, ":\n", string(out))
+		t.Fatal("Install protoc-gen-gogo-nrpc failed", err, ":\n", string(out))
 	}
 	// generate the sources
 	generate := exec.Command("go", "generate", "./examples/helloworld/helloworld")

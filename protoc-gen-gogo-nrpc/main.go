@@ -247,10 +247,12 @@ func getOneofDecl(d *descriptor.DescriptorProto, name string) *descriptor.OneofD
 }
 
 func pkgSubject(fd *descriptor.FileDescriptorProto) string {
-	e, err := proto.GetExtension(fd.Options, nrpc.E_PackageSubject)
-	if err == nil {
-		value := e.(*string)
-		return *value
+	if options := fd.GetOptions(); options != nil {
+		e, err := proto.GetExtension(options, nrpc.E_PackageSubject)
+		if err == nil {
+			value := e.(*string)
+			return *value
+		}
 	}
 	return fd.GetPackage()
 }
@@ -328,10 +330,12 @@ var funcMap = template.FuncMap{
 	},
 	"GetPkgSubject": pkgSubject,
 	"GetPkgSubjectParams": func(fd *descriptor.FileDescriptorProto) []string {
-		e, err := proto.GetExtension(fd.Options, nrpc.E_PackageSubjectParams)
-		if err == nil {
-			value := e.([]string)
-			return value
+		if opts := fd.GetOptions(); opts != nil {
+			e, err := proto.GetExtension(opts, nrpc.E_PackageSubjectParams)
+			if err == nil {
+				value := e.([]string)
+				return value
+			}
 		}
 		return nil
 	},

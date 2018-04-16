@@ -371,7 +371,9 @@ func New{{.GetName}}Client(nc nrpc.NatsConn
 	) *{{.GetName}}Client {
 	return &{{.GetName}}Client{
 		nc:      nc,
+		{{- if ne 0 (len $pkgSubject)}}
 		PkgSubject: "{{$pkgSubject}}",
+		{{- end}}
 		{{- range $pkgSubjectParams}}
 		PkgParam{{.}}: pkgParam{{.}},
 		{{- end}}
@@ -482,8 +484,7 @@ func (c *{{$serviceName}}Client) {{.GetName}}(
 	c.Subject + "." + {{range $serviceSubjectParams -}}
 		c.SvcParam{{.}} + "." + {{end -}}
 	"{{GetMethodSubject .}}"
-	{{- range GetMethodSubjectParams . }} + "." + {{ . }}{{ end -}}
-	;
+	{{- range GetMethodSubjectParams . }} + "." + {{ . }}{{ end }}
 
 	sub, err := nrpc.StreamCall(ctx, c.nc, subject
 		{{- if ne .GetInputType ".nrpc.Void" -}}
@@ -542,8 +543,7 @@ func (c *{{$serviceName}}Client) {{.GetName}}(
 	c.Subject + "." + {{range $serviceSubjectParams -}}
 		c.SvcParam{{.}} + "." + {{end -}}
 	"{{GetMethodSubject .}}"
-	{{- range GetMethodSubjectParams . }} + "." + {{ . }}{{ end -}}
-	;
+	{{- range GetMethodSubjectParams . }} + "." + {{ . }}{{ end }}
 
 	// call
 	{{- if eq .GetInputType ".nrpc.Void"}}
@@ -600,11 +600,13 @@ func NewClient(nc nrpc.NatsConn
 		nc: nc,
 		defaultEncoding: "protobuf",
 		defaultTimeout: 5*time.Second,
+		{{- if ne 0 (len $pkgSubject)}}
 		pkgSubject: "{{$pkgSubject}}",
+		{{- end}}
 		{{- range $pkgSubjectParams}}
 		pkgParam{{.}}: pkgParam{{.}},
 		{{- end}}
-	};
+	}
 	{{- range .Service}}
 	{{- if eq 0 (len (GetServiceSubjectParams .))}}
 	c.{{.GetName}} = New{{.GetName}}Client(nc

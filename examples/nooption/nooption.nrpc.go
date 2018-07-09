@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	nats "github.com/nats-io/go-nats"
-	"github.com/rapidloop/nrpc"
+	"github.com/nats-rpc/nrpc"
 )
 
 // GreeterServer is the interface that providers of the service
@@ -119,7 +119,7 @@ func NewGreeterClient(nc nrpc.NatsConn) *GreeterClient {
 
 func (c *GreeterClient) SayHello(req HelloRequest) (resp HelloReply, err error) {
 
-	subject := c.PkgSubject + "." + c.Subject + "." + "SayHello";
+	subject := c.PkgSubject + "." + c.Subject + "." + "SayHello"
 
 	// call
 	err = nrpc.Call(&req, &resp, c.nc, subject, c.Encoding, c.Timeout)
@@ -144,7 +144,7 @@ func NewClient(nc nrpc.NatsConn) *Client {
 		defaultEncoding: "protobuf",
 		defaultTimeout: 5*time.Second,
 		pkgSubject: "nooption",
-	};
+	}
 	c.Greeter = NewGreeterClient(nc)
 	return &c
 }

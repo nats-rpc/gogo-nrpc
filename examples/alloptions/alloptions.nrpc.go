@@ -145,7 +145,7 @@ func (h *SvcCustomSubjectHandler) Handler(msg *nats.Msg) {
 				Message: "bad request received: " + err.Error(),
 			}
 		} else {
-			request.SetupStreamedReply()
+			request.EnableStreamedReply()
 			request.Handler = func(ctx context.Context)(proto.Message, error){
 				err := h.server.MtStreamedReply(ctx, req, func(rep SimpleStringReply){
 					request.SendStreamReply(&rep)
@@ -167,7 +167,7 @@ func (h *SvcCustomSubjectHandler) Handler(msg *nats.Msg) {
 				Message: "bad request received: " + err.Error(),
 			}
 		} else {
-			request.SetupStreamedReply()
+			request.EnableStreamedReply()
 			request.Handler = func(ctx context.Context)(proto.Message, error){
 				err := h.server.MtVoidReqStreamedReply(ctx, func(rep SimpleStringReply){
 					request.SendStreamReply(&rep)
@@ -184,12 +184,9 @@ func (h *SvcCustomSubjectHandler) Handler(msg *nats.Msg) {
 	}
 	if immediateError == nil {
 		if h.workers != nil {
-			// Try queuing the requests
-			if h.workers.QueueRequest(request) == nrpc.ErrTooManyPendingRequests {
-				immediateError = &nrpc.Error{
-					Type: nrpc.Error_SERVERTOOBUSY,
-					Message: "Too many pending requests",
-				}
+			// Try queuing the request
+			if err := h.workers.QueueRequest(request); err != nil {
+				log.Printf("nrpc: Error queuing the request: %s", err)
 			}
 		} else {
 			// Run the handler synchronously
@@ -474,7 +471,7 @@ func (h *SvcSubjectParamsHandler) Handler(msg *nats.Msg) {
 				Message: "bad request received: " + err.Error(),
 			}
 		} else {
-			request.SetupStreamedReply()
+			request.EnableStreamedReply()
 			request.Handler = func(ctx context.Context)(proto.Message, error){
 				err := h.server.MtStreamedReplyWithSubjectParams(ctx, mtParams[0], mtParams[1], func(rep SimpleStringReply){
 					request.SendStreamReply(&rep)
@@ -517,12 +514,9 @@ func (h *SvcSubjectParamsHandler) Handler(msg *nats.Msg) {
 	}
 	if immediateError == nil {
 		if h.workers != nil {
-			// Try queuing the requests
-			if h.workers.QueueRequest(request) == nrpc.ErrTooManyPendingRequests {
-				immediateError = &nrpc.Error{
-					Type: nrpc.Error_SERVERTOOBUSY,
-					Message: "Too many pending requests",
-				}
+			// Try queuing the request
+			if err := h.workers.QueueRequest(request); err != nil {
+				log.Printf("nrpc: Error queuing the request: %s", err)
 			}
 		} else {
 			// Run the handler synchronously

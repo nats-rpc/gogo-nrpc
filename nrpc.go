@@ -261,10 +261,12 @@ type Request struct {
 	Context context.Context
 	Conn    NatsConn
 
+	isStreamedReply bool
 	KeepStreamAlive *KeepStreamAlive
 	StreamContext   context.Context
 	StreamCancel    func()
 	StreamMsgCount  uint32
+	streamLock      sync.Mutex
 
 	Subject     string
 	MethodName  string
@@ -309,6 +311,9 @@ func (r Request) Run() (msg proto.Message, replyError *Error) {
 // RunAndReply calls Run() and send the reply back to the caller
 func (r *Request) RunAndReply() {
 	var failed, replyFailed bool
+	// In case RunAndReply was called directly, we may need to initialize the
+	// streamed reply
+	r.setupStreamedReply()
 	resp, replyError := r.Run()
 	if replyError != nil {
 		failed = true
@@ -357,8 +362,19 @@ func (r *Request) SetServiceParam(key, value string) {
 	r.ServiceParams[key] = value
 }
 
-// SetupStreamedReply initializes the reply stream
-func (r *Request) SetupStreamedReply() {
+// EnableStreamedReply enables the streamed reply mode
+func (r *Request) EnableStreamedReply() {
+	r.isStreamedReply = true
+}
+
+// setupStreamedReply initializes the reply stream if needed.
+func (r *Request) setupStreamedReply() {
+	r.streamLock.Lock()
+	defer r.streamLock.Unlock()
+
+	if !r.StreamedReply() || r.KeepStreamAlive != nil {
+		return
+	}
 	r.StreamContext, r.StreamCancel = context.WithCancel(r.Context)
 	r.KeepStreamAlive = NewKeepStreamAlive(
 		r.Conn, r.ReplySubject, r.Encoding, r.StreamCancel)
@@ -366,7 +382,7 @@ func (r *Request) SetupStreamedReply() {
 
 // StreamedReply returns true if the request reply is streamed
 func (r Request) StreamedReply() bool {
-	return r.KeepStreamAlive != nil
+	return r.isStreamedReply
 }
 
 // SendStreamReply send a reply a part of a stream
@@ -396,6 +412,14 @@ func (r *Request) SendReply(resp proto.Message, withError *Error) error {
 // sendReply sends a reply to the caller
 func (r *Request) sendReply(resp proto.Message, withError *Error) error {
 	return Publish(resp, withError, r.Conn, r.ReplySubject, r.Encoding)
+}
+
+// SendErrorTooBusy cancels the request with a 'SERVERTOOBUSY' error
+func (r *Request) SendErrorTooBusy(msg string) error {
+	return r.SendReply(nil, &Error{
+		Type:    Error_SERVERTOOBUSY,
+		Message: msg,
+	})
 }
 
 var ErrEOS = errors.New("End of stream")
@@ -681,9 +705,6 @@ func (k *KeepStreamAlive) loop() {
 	}
 }
 
-// ErrTooManyPendingRequests is returned if the pending queue is full
-var ErrTooManyPendingRequests = errors.New("Too many pending requests")
-
 // WorkerPool is a poof of workers
 type WorkerPool struct {
 	Context       context.Context
@@ -739,10 +760,16 @@ func (pool *WorkerPool) scheduler() {
 	queueLoop:
 		for request := range queue {
 			now := time.Now()
+
+			pool.m.Lock()
 			deadline := request.CreatedAt.Add(pool.maxPendingDuration)
+			pool.m.Unlock()
 
 			log.Printf("scheduler: got a request. Deadline in=%s", deadline.Sub(now))
 			if deadline.After(now) {
+				// Safety call to setupStreamedReply in case QueueRequest had
+				// to time to do it yet
+				request.setupStreamedReply()
 				log.Printf("scheduler: try scheduling")
 				select {
 				case pool.schedule <- request:
@@ -757,10 +784,7 @@ func (pool *WorkerPool) scheduler() {
 			}
 
 			log.Printf("Sending SERVERTOOBUSY to the caller")
-			request.SendReply(nil, &Error{
-				Type:    Error_SERVERTOOBUSY,
-				Message: "No worker available",
-			})
+			request.SendErrorTooBusy("No worker available")
 		}
 	}
 }
@@ -789,18 +813,30 @@ func (pool *WorkerPool) SetMaxPending(value uint) {
 	pool.queue = make(chan *Request, value)
 	pool.maxPending = value
 
-	for request := range oldQueue {
-		pool.queue <- request
-	}
 	close(oldQueue)
+
+	// drain the old queue and cancel requests if there are too many
+	for request := range oldQueue {
+		select {
+		case pool.queue <- request:
+		default:
+			request.SendErrorTooBusy("too many pending requests")
+		}
+	}
 }
 
+// SetMaxPendingDuration changes the max pending delay
 func (pool *WorkerPool) SetMaxPendingDuration(value time.Duration) {
+	pool.m.Lock()
 	pool.maxPendingDuration = value
+	pool.m.Unlock()
 }
 
 // SetSize changes the number of workers
 func (pool *WorkerPool) SetSize(size uint) {
+	pool.m.Lock()
+	defer pool.m.Unlock()
+
 	if size == pool.size {
 		return
 	}
@@ -816,13 +852,14 @@ func (pool *WorkerPool) SetSize(size uint) {
 }
 
 // QueueRequest adds a request to the queue
-// returns ErrTooManyPendingRequests if the queue is full
+// Send a SERVERTOOBUSY error to the client if the queue is full
 func (pool *WorkerPool) QueueRequest(request *Request) error {
 	select {
 	case pool.getQueue() <- request:
+		request.setupStreamedReply()
 		return nil
 	default:
-		return ErrTooManyPendingRequests
+		return request.SendErrorTooBusy("too many pending requests")
 	}
 }
 
@@ -839,12 +876,13 @@ func (pool *WorkerPool) Close(timeout time.Duration) {
 	pool.m.Unlock()
 
 	close(oldQueue)
-	for range oldQueue {
+	for request := range oldQueue {
+		request.SendErrorTooBusy("Worker pool shutting down")
 	}
 
 	// Now wait for the workers to stop and cancel the context if they don't
-	close(pool.schedule)
 	timer := time.AfterFunc(timeout, pool.contextCancel)
 	pool.waitGroup.Wait()
 	timer.Stop()
+	close(pool.schedule)
 }

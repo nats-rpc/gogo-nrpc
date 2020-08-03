@@ -451,17 +451,17 @@ func NewStreamCallSubscription(
 		subject:  subject,
 		timeout:  timeout,
 		timeoutT: time.NewTimer(timeout),
+		closed:   false,
 		subCh:    make(chan *nats.Msg, 256),
 		nextCh:   make(chan *nats.Msg),
 		quit:     make(chan struct{}),
-		errCh:    make(chan error),
+		errCh:    make(chan error, 1),
 	}
 	ssub, err := nc.ChanSubscribe(subject, sub.subCh)
 	if err != nil {
 		return nil, err
 	}
-	sub.sub = ssub
-	go sub.loop()
+	go sub.loop(ssub)
 	return &sub, nil
 }
 
@@ -472,7 +472,7 @@ type StreamCallSubscription struct {
 	subject  string
 	timeout  time.Duration
 	timeoutT *time.Timer
-	sub      *nats.Subscription
+	closed   bool
 	subCh    chan *nats.Msg
 	nextCh   chan *nats.Msg
 	quit     chan struct{}
@@ -484,11 +484,11 @@ func (sub *StreamCallSubscription) stop() {
 	close(sub.quit)
 }
 
-func (sub *StreamCallSubscription) loop() {
+func (sub *StreamCallSubscription) loop(ssub *nats.Subscription) {
 	hbSubject := sub.subject + ".heartbeat"
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
-	defer sub.sub.Unsubscribe()
+	defer ssub.Unsubscribe()
 	for {
 		select {
 		case msg := <-sub.subCh:
@@ -536,17 +536,17 @@ func (sub *StreamCallSubscription) loop() {
 }
 
 func (sub *StreamCallSubscription) Next(rep proto.Message) error {
-	if sub.sub == nil {
+	if sub.closed {
 		return nats.ErrBadSubscription
 	}
 	select {
 	case err := <-sub.errCh:
-		sub.sub = nil
+		sub.closed = true
 		return err
 	case msg := <-sub.nextCh:
 		if err := UnmarshalResponse(sub.encoding, msg.Data, rep); err != nil {
 			sub.stop()
-			sub.sub = nil
+			sub.closed = true
 			if nrpcErr, ok := err.(*Error); ok {
 				if nrpcErr.GetMsgCount() != sub.msgCount {
 					log.Printf(

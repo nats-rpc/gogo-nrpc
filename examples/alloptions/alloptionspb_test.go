@@ -7,8 +7,8 @@ import (
 	fmt "fmt"
 	_ "github.com/gogo/protobuf/gogoproto"
 	github_com_gogo_protobuf_jsonpb "github.com/gogo/protobuf/jsonpb"
-	github_com_golang_protobuf_proto "github.com/golang/protobuf/proto"
-	proto "github.com/golang/protobuf/proto"
+	github_com_gogo_protobuf_proto "github.com/gogo/protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/nats-rpc/gogo-nrpc"
 	go_parser "go/parser"
 	math "math"
@@ -26,12 +26,12 @@ func TestStringArgProto(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedStringArg(popr, false)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	msg := &StringArg{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	littlefuzz := make([]byte, len(dAtA))
@@ -52,7 +52,7 @@ func TestStringArgProto(t *testing.T) {
 			littlefuzz = append(littlefuzz, byte(popr.Intn(256)))
 		}
 		// shouldn't panic
-		_ = github_com_golang_protobuf_proto.Unmarshal(littlefuzz, msg)
+		_ = github_com_gogo_protobuf_proto.Unmarshal(littlefuzz, msg)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestStringArgMarshalTo(t *testing.T) {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	msg := &StringArg{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	for i := range dAtA {
@@ -93,7 +93,7 @@ func BenchmarkStringArgProtoMarshal(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		dAtA, err := github_com_golang_protobuf_proto.Marshal(pops[i%10000])
+		dAtA, err := github_com_gogo_protobuf_proto.Marshal(pops[i%10000])
 		if err != nil {
 			panic(err)
 		}
@@ -107,7 +107,7 @@ func BenchmarkStringArgProtoUnmarshal(b *testing.B) {
 	total := 0
 	datas := make([][]byte, 10000)
 	for i := 0; i < 10000; i++ {
-		dAtA, err := github_com_golang_protobuf_proto.Marshal(NewPopulatedStringArg(popr, false))
+		dAtA, err := github_com_gogo_protobuf_proto.Marshal(NewPopulatedStringArg(popr, false))
 		if err != nil {
 			panic(err)
 		}
@@ -117,7 +117,7 @@ func BenchmarkStringArgProtoUnmarshal(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		total += len(datas[i%10000])
-		if err := github_com_golang_protobuf_proto.Unmarshal(datas[i%10000], msg); err != nil {
+		if err := github_com_gogo_protobuf_proto.Unmarshal(datas[i%10000], msg); err != nil {
 			panic(err)
 		}
 	}
@@ -128,12 +128,12 @@ func TestSimpleStringReplyProto(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedSimpleStringReply(popr, false)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	msg := &SimpleStringReply{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	littlefuzz := make([]byte, len(dAtA))
@@ -154,7 +154,7 @@ func TestSimpleStringReplyProto(t *testing.T) {
 			littlefuzz = append(littlefuzz, byte(popr.Intn(256)))
 		}
 		// shouldn't panic
-		_ = github_com_golang_protobuf_proto.Unmarshal(littlefuzz, msg)
+		_ = github_com_gogo_protobuf_proto.Unmarshal(littlefuzz, msg)
 	}
 }
 
@@ -172,7 +172,7 @@ func TestSimpleStringReplyMarshalTo(t *testing.T) {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	msg := &SimpleStringReply{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	for i := range dAtA {
@@ -195,7 +195,7 @@ func BenchmarkSimpleStringReplyProtoMarshal(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		dAtA, err := github_com_golang_protobuf_proto.Marshal(pops[i%10000])
+		dAtA, err := github_com_gogo_protobuf_proto.Marshal(pops[i%10000])
 		if err != nil {
 			panic(err)
 		}
@@ -209,7 +209,7 @@ func BenchmarkSimpleStringReplyProtoUnmarshal(b *testing.B) {
 	total := 0
 	datas := make([][]byte, 10000)
 	for i := 0; i < 10000; i++ {
-		dAtA, err := github_com_golang_protobuf_proto.Marshal(NewPopulatedSimpleStringReply(popr, false))
+		dAtA, err := github_com_gogo_protobuf_proto.Marshal(NewPopulatedSimpleStringReply(popr, false))
 		if err != nil {
 			panic(err)
 		}
@@ -219,7 +219,7 @@ func BenchmarkSimpleStringReplyProtoUnmarshal(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		total += len(datas[i%10000])
-		if err := github_com_golang_protobuf_proto.Unmarshal(datas[i%10000], msg); err != nil {
+		if err := github_com_gogo_protobuf_proto.Unmarshal(datas[i%10000], msg); err != nil {
 			panic(err)
 		}
 	}
@@ -272,9 +272,9 @@ func TestStringArgProtoText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedStringArg(popr, true)
-	dAtA := github_com_golang_protobuf_proto.MarshalTextString(p)
+	dAtA := github_com_gogo_protobuf_proto.MarshalTextString(p)
 	msg := &StringArg{}
-	if err := github_com_golang_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -289,9 +289,9 @@ func TestStringArgProtoCompactText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedStringArg(popr, true)
-	dAtA := github_com_golang_protobuf_proto.CompactTextString(p)
+	dAtA := github_com_gogo_protobuf_proto.CompactTextString(p)
 	msg := &StringArg{}
-	if err := github_com_golang_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -306,9 +306,9 @@ func TestSimpleStringReplyProtoText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedSimpleStringReply(popr, true)
-	dAtA := github_com_golang_protobuf_proto.MarshalTextString(p)
+	dAtA := github_com_gogo_protobuf_proto.MarshalTextString(p)
 	msg := &SimpleStringReply{}
-	if err := github_com_golang_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -323,9 +323,9 @@ func TestSimpleStringReplyProtoCompactText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedSimpleStringReply(popr, true)
-	dAtA := github_com_golang_protobuf_proto.CompactTextString(p)
+	dAtA := github_com_gogo_protobuf_proto.CompactTextString(p)
 	msg := &SimpleStringReply{}
-	if err := github_com_golang_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -339,12 +339,12 @@ func TestSimpleStringReplyProtoCompactText(t *testing.T) {
 func TestStringArgVerboseEqual(t *testing.T) {
 	popr := math_rand.New(math_rand.NewSource(time.Now().UnixNano()))
 	p := NewPopulatedStringArg(popr, false)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		panic(err)
 	}
 	msg := &StringArg{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		panic(err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -354,12 +354,12 @@ func TestStringArgVerboseEqual(t *testing.T) {
 func TestSimpleStringReplyVerboseEqual(t *testing.T) {
 	popr := math_rand.New(math_rand.NewSource(time.Now().UnixNano()))
 	p := NewPopulatedSimpleStringReply(popr, false)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		panic(err)
 	}
 	msg := &SimpleStringReply{}
-	if err := github_com_golang_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
+	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		panic(err)
 	}
 	if err := p.VerboseEqual(msg); err != nil {
@@ -396,8 +396,8 @@ func TestStringArgSize(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedStringArg(popr, true)
-	size2 := github_com_golang_protobuf_proto.Size(p)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	size2 := github_com_gogo_protobuf_proto.Size(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -408,7 +408,7 @@ func TestStringArgSize(t *testing.T) {
 	if size2 != size {
 		t.Errorf("seed = %d, size %v != before marshal proto.Size %v", seed, size, size2)
 	}
-	size3 := github_com_golang_protobuf_proto.Size(p)
+	size3 := github_com_gogo_protobuf_proto.Size(p)
 	if size3 != size {
 		t.Errorf("seed = %d, size %v != after marshal proto.Size %v", seed, size, size3)
 	}
@@ -432,8 +432,8 @@ func TestSimpleStringReplySize(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
 	p := NewPopulatedSimpleStringReply(popr, true)
-	size2 := github_com_golang_protobuf_proto.Size(p)
-	dAtA, err := github_com_golang_protobuf_proto.Marshal(p)
+	size2 := github_com_gogo_protobuf_proto.Size(p)
+	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -444,7 +444,7 @@ func TestSimpleStringReplySize(t *testing.T) {
 	if size2 != size {
 		t.Errorf("seed = %d, size %v != before marshal proto.Size %v", seed, size, size2)
 	}
-	size3 := github_com_golang_protobuf_proto.Size(p)
+	size3 := github_com_gogo_protobuf_proto.Size(p)
 	if size3 != size {
 		t.Errorf("seed = %d, size %v != after marshal proto.Size %v", seed, size, size3)
 	}

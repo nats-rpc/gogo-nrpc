@@ -1,3 +1,3 @@
 package helloworld
 
-//go:generate protoc --go_out . --gogo-nrpc_out plugins=prometheus:. helloworld.proto
+//go:generate protoc -I. -I../../.. -I../../../protobuf/protobuf -I ../../../protobuf/gogoproto --gogo_out=Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:. --gogo-nrpc_out . helloworld.proto

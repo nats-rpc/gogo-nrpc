@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/gogo/protobuf/proto"
 	nats "github.com/nats-io/nats.go"
 
 	nrpc "github.com/nats-rpc/gogo-nrpc"

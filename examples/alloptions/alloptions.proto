@@ -11,7 +11,6 @@ option (nrpc.packageSubjectParams) = "instance";
 option (nrpc.serviceSubjectRule) = TOLOWER;
 option (nrpc.methodSubjectRule) = TOLOWER;
 
-option (gogoproto.gogoproto_import) = false;
 option (gogoproto.gostring_all) = true;
 option (gogoproto.equal_all) = true;
 option (gogoproto.verbose_equal_all) = true;

@@ -2,7 +2,6 @@ syntax = "proto3";
 
 import "gogo.proto";
 
-option (gogoproto.gogoproto_import) = false;
 option (gogoproto.gostring_all) = true;
 option (gogoproto.equal_all) = true;
 option (gogoproto.verbose_equal_all) = true;

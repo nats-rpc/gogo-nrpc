@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package main;
 
-import "github.com/nats-rpc/gogo-nrpc/nrpc/nrpc.proto";
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "nrpc/nrpc.proto";
+import "gogo.proto";
 
 option (nrpc.packageSubject) = "root";
 option (nrpc.packageSubjectParams) = "instance";

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	nats "github.com/nats-io/go-nats"
-	"github.com/nats-rpc/nrpc"
+	nats "github.com/nats-io/nats.go"
+	"github.com/nats-rpc/gogo-nrpc"
 )
 
 // GreeterServer is the interface that providers of the service

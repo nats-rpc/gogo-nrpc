@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 	nrpc "github.com/nats-rpc/gogo-nrpc"
 	"gotest.tools/assert"
 )

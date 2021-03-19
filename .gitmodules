@@ -1,0 +1,4 @@
+[submodule "protobuf"]
+	path = protobuf
+	url = git@github.com:gogo/protobuf.git
+    tag = v1.3.2

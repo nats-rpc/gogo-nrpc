@@ -14,7 +14,7 @@ import (
 
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 )
 
 // ContextKey type for storing values into context.Context
@@ -23,7 +23,8 @@ type ContextKey int
 // ErrStreamInvalidMsgCount is when a stream reply gets a wrong number of messages
 var ErrStreamInvalidMsgCount = errors.New("Stream reply received an incorrect number of messages")
 
-//go:generate protoc -I. -I../../.. --gogo_out=Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:../../.. nrpc/nrpc.proto
+//go:generate protoc -I. -I./protobuf/protobuf -I./protobuf/gogoproto --gogo_out=Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:. --gogo_opt=paths=source_relative nrpc/nrpc.proto
+//go:generate mv nrpc/nrpc.pb.go nrpc/nrpcpb_test.go .
 
 type NatsConn interface {
 	Publish(subj string, data []byte) error
